@@ -1,0 +1,16 @@
+# .NET 编译输出 / 中间文件 —— dotnet build / dotnet publish 每次都会重新生成，
+# 体积很大（因为项目是 SelfContained 发布，会把整个 WPF 运行时复制进去），不需要入库。
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio 本地缓存与用户级设置
+.vs/
+*.user
+*.suo
+
+# 程序运行时在 exe 同目录生成的日志文件
+termsearch.log
+
+# 常见系统/编辑器垃圾文件
+Thumbs.db
+.DS_Store

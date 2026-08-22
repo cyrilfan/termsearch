@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>TermSearch</AssemblyName>
+    <RootNamespace>TermSearch</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- 我们通过 app.manifest 声明 PerMonitorV2 DPI 感知（WPF 窗口定位依赖它），
+         WinForms 分析器会建议改用 SetHighDpiMode API，但那只影响 WinForms 控件，这里用不到，忽略即可。 -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+
+    <!-- 绿色版单文件发布设置：dotnet publish -c Release -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="terms.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
