@@ -10,8 +10,12 @@
       - f2 里的缩写，f1 没有：整条新增到 f1。
       - f2 里的缩写，f1 已有，但全称（FullName）不一样：在该缩写下追加一条
         （多义词，跟 ACS/PM 这类词条的处理方式一致）。
-      - f2 里的缩写和全称，f1 都已经一模一样：判定为重复，跳过、不合并，
-        并把跳过的条目打印到屏幕上，方便你知道漏了什么/为什么没合并。
+      - f2 里的缩写和全称，f1 都已经一模一样，分两种情况：
+          - f1 那条的 Description 是空的，而 f2 这条有内容：把 f2 的
+            Description 补进 f1 对应的那一条（不新增条目，只是把空的填上）。
+          - 除此之外（f1 已经有内容，或者 f1、f2 都是空的）：判定为重复，
+            跳过、不合并，并把跳过的条目打印到屏幕上，方便你知道漏了什么/
+            为什么没合并。
 
     默认直接把合并结果写回 f1.json（原地更新）；如果不想动 f1.json，
     可以用 -OutputPath 指定写到别的文件。
@@ -72,41 +76,51 @@ foreach ($key in $data1.Keys) {
 
 $newKeyCount = 0
 $appendedCount = 0
+$filledCount = 0
 $skipped = New-Object 'System.Collections.Generic.List[object]'
 
 foreach ($key in $data2.Keys) {
     foreach ($entry in $data2[$key]) {
         $fullName = $entry['FullName']
+        $description2 = $entry['Description']
 
         if (-not $merged.ContainsKey($key)) {
             $newList = New-Object 'System.Collections.Generic.List[object]'
-            $newList.Add([ordered]@{ FullName = $fullName; Description = $entry['Description'] })
+            $newList.Add([ordered]@{ FullName = $fullName; Description = $description2 })
             $merged[$key] = $newList
             $newKeyCount++
             continue
         }
 
         $existingEntries = $merged[$key]
-        $duplicate = $false
+        $matchedEntry = $null
         foreach ($existing in $existingEntries) {
             if ([string]$existing['FullName'] -ceq $fullName) {
-                $duplicate = $true
+                $matchedEntry = $existing
                 break
             }
         }
 
-        if ($duplicate) {
-            $skipped.Add([pscustomobject]@{ Key = $key; FullName = $fullName })
+        if ($null -eq $matchedEntry) {
+            # 同一缩写下没有全称匹配的条目：作为新的释义追加。
+            # 已有的条目数组可能是反序列化出来的固定大小数组，不支持 Add，
+            # 统一转成可变 List 再追加，然后整体替换回去。
+            $mutableEntries = New-Object 'System.Collections.Generic.List[object]'
+            foreach ($e in $existingEntries) { $mutableEntries.Add($e) }
+            $mutableEntries.Add([ordered]@{ FullName = $fullName; Description = $description2 })
+            $merged[$key] = $mutableEntries
+            $appendedCount++
             continue
         }
 
-        # 已有的条目数组可能是反序列化出来的固定大小数组，不支持 Add，
-        # 统一转成可变 List 再追加，然后整体替换回去。
-        $mutableEntries = New-Object 'System.Collections.Generic.List[object]'
-        foreach ($e in $existingEntries) { $mutableEntries.Add($e) }
-        $mutableEntries.Add([ordered]@{ FullName = $fullName; Description = $entry['Description'] })
-        $merged[$key] = $mutableEntries
-        $appendedCount++
+        # 缩写 + 全称都匹配上了：f1 这条 Description 是空的、f2 有内容，就补上；否则算重复跳过。
+        if ([string]::IsNullOrWhiteSpace($matchedEntry['Description']) -and -not [string]::IsNullOrWhiteSpace($description2)) {
+            $matchedEntry['Description'] = $description2
+            $filledCount++
+        }
+        else {
+            $skipped.Add([pscustomobject]@{ Key = $key; FullName = $fullName })
+        }
     }
 }
 
@@ -116,6 +130,7 @@ $json = $merged | ConvertTo-Json -Depth 10
 Write-Host "合并完成，写入：$OutputPath"
 Write-Host "  新增缩写：$newKeyCount"
 Write-Host "  同一缩写下追加释义（多义词）：$appendedCount"
+Write-Host "  补上 f1 里空缺的 Description：$filledCount"
 Write-Host "  跳过（缩写+全称已在 f1 中重复）：$($skipped.Count)"
 
 if ($skipped.Count -gt 0) {

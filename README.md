@@ -106,7 +106,7 @@ tools\Export-EmptyDescriptions.ps1 -InputPath src\TermSearch\terms.json -OutputP
 
 ### `Merge-TermsFiles.ps1`
 
-把两个 terms.json 格式的文件合并成一个：f2 里 f1 没有的缩写整条新增；同一缩写下全称不同则追加一条（多义词）；缩写+全称都跟 f1 里已有的重复则跳过，不合并，并把跳过的条目打印到屏幕上。默认原地覆盖 f1，可以用 `-OutputPath` 另存到别的文件。
+把两个 terms.json 格式的文件合并成一个：f2 里 f1 没有的缩写整条新增；同一缩写下全称不同则追加一条（多义词）；缩写+全称都跟 f1 里已有的重复时，如果 f1 那条 Description 是空的而 f2 有内容就补上，否则跳过、不合并，并把跳过的条目打印到屏幕上。默认原地覆盖 f1，可以用 `-OutputPath` 另存到别的文件。
 
 ```powershell
 tools\Merge-TermsFiles.ps1 -File1Path f1.json -File2Path f2.json
