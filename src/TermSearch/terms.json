@@ -691,6 +691,10 @@
                 {
                     "FullName":  "Bill of Material Cost",
                     "Description":  "生产物料成本"
+                },
+                {
+                    "FullName":  "Board Management Controller",
+                    "Description":  "符合IPMI协议规范的板级管理控制器"
                 }
             ],
     "BMS":  [
@@ -1057,6 +1061,10 @@
                 {
                     "FullName":  "Clock Domain Crossing",
                     "Description":  "跨时钟域"
+                },
+                {
+                    "FullName":  "Corrupt Data Containment",
+                    "Description":  "损坏数据隔离，又称为Data Poisoning（数据毒化），一种错误隔离机制"
                 }
             ],
     "CDCP":  [
@@ -1381,6 +1389,10 @@
                 {
                     "FullName":  "Chip Power Model",
                     "Description":  "芯片功耗模型"
+                },
+                {
+                    "FullName":  "Common Platform Module",
+                    "Description":  "通用平台模块"
                 }
             ],
     "CPU":  [
@@ -1757,6 +1769,10 @@
                 {
                     "FullName":  "Debug Control Unit",
                     "Description":  "负责调试功能控制的硬件单元"
+                },
+                {
+                    "FullName":  "Data Cache Unit",
+                    "Description":  "数据缓存，属于一级缓存"
                 }
             ],
     "DD":  [
@@ -1947,6 +1963,10 @@
                 {
                     "FullName":  "Debug Module Interface",
                     "Description":  "访问调试模块（DM）功能所使用的标准接口"
+                },
+                {
+                    "FullName":  "Direct Media Interface",
+                    "Description":  "直接媒体接口，Intel(英特尔)公司开发的用于连接处理器和平台控制器（PCH）的总线"
                 }
             ],
     "DMIPS":  [
@@ -2437,6 +2457,10 @@
                  {
                      "FullName":  "Error Detection and Correction",
                      "Description":  "检测并纠正数据传输或存储过程中出现错误的技术统称"
+                 },
+                 {
+                     "FullName":  "Error Detection And Correction Driver",
+                     "Description":  "Linux操作系统内核的一个可选组件，用于检测和上报硬件错误，也用于提取额外的平台特定信息"
                  }
              ],
     "EDAS":  [
@@ -4163,6 +4187,10 @@
                 {
                     "FullName":  "Hygone Multi-chip Interconnect",
                     "Description":  "海光多芯片互连技术,用于在处理器封装内多个芯片裸片之间建立高速通信连接。"
+                },
+                {
+                    "FullName":  "Hygon Memory Interconnect",
+                    "Description":  "海光内存互连，CPU插槽内Die之间的一致性互连"
                 }
             ],
     "HN":  [
@@ -4441,7 +4469,7 @@
             ],
     "IMC":  [
                 {
-                    "FullName":  "integrated Memory Controller",
+                    "FullName":  "Integrated Memory Controller",
                     "Description":  "集成在处理器芯片内部的内存控制器"
                 }
             ],
@@ -5031,6 +5059,10 @@
                 {
                     "FullName":  "Low Voltage Threshold",
                     "Description":  "低阈值电压, 特性是更好的时序, 但功耗很高, 尤其是静态功耗"
+                },
+                {
+                    "FullName":  "Local Vector Table",
+                    "Description":  "本地向量表，一组定义本地事件中断的APIC寄存器集合"
                 }
             ],
     "Litho":  [
@@ -5881,7 +5913,7 @@
            ],
     "OS":  [
                {
-                   "FullName":  "Operation System",
+                   "FullName":  "Operating System",
                    "Description":  "操作系统，管理计算机硬件资源并为应用程序提供运行环境的系统软件"
                }
            ],
@@ -8085,6 +8117,10 @@
                 {
                     "FullName":  "System Manager Interrupt",
                     "Description":  "x86架构中优先级最高、用于处理系统管理任务（如电源管理）的特殊中断"
+                },
+                {
+                    "FullName":  "System Management Interrupt",
+                    "Description":  "系统管理中断，一种指向SMM代码执行的中断"
                 }
             ],
     "SMIC":  [
@@ -9845,6 +9881,10 @@
                 {
                     "FullName":  "Fetch Request Buffer",
                     "Description":  "暂存取指请求的缓冲区"
+                },
+                {
+                    "FullName":  "Fault Resilient Boot",
+                    "Description":  "容错启动机制"
                 }
             ],
     "LRB":  [
@@ -10637,6 +10677,10 @@
                 {
                     "FullName":  "System Management Controller Unit/System Management Unit",
                     "Description":  "系统管理单元"
+                },
+                {
+                    "FullName":  "System Management Unit",
+                    "Description":  "系统管理单元，负责系统管理和电源状态转换的片上微控制器"
                 }
             ],
     "AGU":  [
@@ -10722,5 +10766,221 @@
                     "FullName":  "Fault-only-first",
                     "Description":  "仅首个故障,一种故障处理机制,在向量化或批量操作中仅报告第一个发生的故障,其余延迟处理。"
                 }
-            ]
+            ],
+    "pcls":  [
+                 {
+                     "FullName":  "Partial Cache Line Sparing",
+                     "Description":  ""
+                 }
+             ],
+    "APEI":  [
+                 {
+                     "FullName":  "ACPI Platform Error Interface",
+                     "Description":  "ACPI平台错误接口"
+                 }
+             ],
+    "APML":  [
+                 {
+                     "FullName":  "Advanced Platform Management Link",
+                     "Description":  "高级平台管理链路"
+                 }
+             ],
+    "CDD":  [
+                {
+                    "FullName":  "Core Die",
+                    "Description":  "核心Die，封装内包含处理器核心的裸片"
+                }
+            ],
+    "CMCI":  [
+                 {
+                     "FullName":  "Corrected Machine Check Interrupt",
+                     "Description":  "已纠正机器检查中断，用于上报已被硬件纠正的错误"
+                 }
+             ],
+    "Core":  [
+                 {
+                     "FullName":  "Core",
+                     "Description":  "处理器的一部分，包括执行单元，例如执行引擎（EE）和专用高速缓存"
+                 }
+             ],
+    "DEC-TED ECC":  [
+                        {
+                            "FullName":  "Double Error Correct-Triple Error Detect Error Correcting Code",
+                            "Description":  "双纠三检纠错码，可纠正双比特错误并检测三比特错误的硬件特性"
+                        }
+                    ],
+    "ECRC":  [
+                 {
+                     "FullName":  "End-to-end Cyclic Redundancy Code",
+                     "Description":  "端到端循环冗余校验码"
+                 }
+             ],
+    "eDPC":  [
+                 {
+                     "FullName":  "Enhanced Downstream Port Containment",
+                     "Description":  "增强型下游端口隔离机制"
+                 }
+             ],
+    "EMCA":  [
+                 {
+                     "FullName":  "Enhanced Machine Check Architecture",
+                     "Description":  "增强型机器检查架构"
+                 }
+             ],
+    "FCH":  [
+                {
+                    "FullName":  "Fusion Controller Hub",
+                    "Description":  "相当于集成到CPU中的南桥"
+                }
+            ],
+    "FFM":  [
+                {
+                    "FullName":  "Firmware First Model",
+                    "Description":  "固件优先模型，一种由固件优先处理硬件错误的模型"
+                }
+            ],
+    "HDM":  [
+                {
+                    "FullName":  "H3C Device Management",
+                    "Description":  "H3C自研的遵循IPMI协议的板级管理控制器"
+                }
+            ],
+    "ICU":  [
+                {
+                    "FullName":  "Instruction Cache Unit",
+                    "Description":  "指令缓存"
+                }
+            ],
+    "IEH":  [
+                {
+                    "FullName":  "Integrated Error Handler",
+                    "Description":  "集成的错误处理模块"
+                }
+            ],
+    "IOD":  [
+                {
+                    "FullName":  "I/O Die",
+                    "Description":  "I/O裸片，封装内负责I/O功能的Die"
+                }
+            ],
+    "LCRC":  [
+                 {
+                     "FullName":  "Link Cyclic Redundancy Check",
+                     "Description":  "PCI Express链路CRC，用于保护DLLP传输的CRC码；接收方将计算的CRC值与包中携带的CRC值比对，不一致时通过NAK通知发送方"
+                 }
+             ],
+    "MCA":  [
+                {
+                    "FullName":  "Machine Check Architecture",
+                    "Description":  "机器检查架构，x86错误上报接口"
+                }
+            ],
+    "MCAX":  [
+                 {
+                     "FullName":  "Machine Check Architecture eXtensions",
+                     "Description":  "机器检查架构扩展，扩展的x86机器检查接口"
+                 }
+             ],
+    "MCE":  [
+                {
+                    "FullName":  "Machine-Check Exception",
+                    "Description":  "机器检查异常，x86中用于上报错误的异常机制"
+                }
+            ],
+    "MRC":  [
+                {
+                    "FullName":  "Memory Reference Code",
+                    "Description":  "内存参考代码"
+                }
+            ],
+    "Parity":  [
+                   {
+                       "FullName":  "Parity",
+                       "Description":  "奇偶校验，用于检测单比特错误的硬件特性"
+                   }
+               ],
+    "PCLS":  [
+                 {
+                     "FullName":  "Partial Cache Line Sparing",
+                     "Description":  "部分缓存行备用机制"
+                 }
+             ],
+    "PFEH":  [
+                 {
+                     "FullName":  "Platform First Error Handling",
+                     "Description":  "平台优先错误处理"
+                 }
+             ],
+    "runtime":  [
+                    {
+                        "FullName":  "runtime",
+                        "Description":  "运行期间，本文特指在OS运行期间"
+                    }
+                ],
+    "SBI":  [
+                {
+                    "FullName":  "Sideband Interface",
+                    "Description":  "边带接口"
+                }
+            ],
+    "SB-RMI":  [
+                   {
+                       "FullName":  "Sideband Remote Management Interface",
+                       "Description":  "边带远程管理接口"
+                   }
+               ],
+    "SDDC":  [
+                 {
+                     "FullName":  "Single Device Data Correction",
+                     "Description":  "单设备数据纠正（DIMM CRC），可纠正单个内存芯片故障导致的数据错误"
+                 }
+             ],
+    "SEC-DED ECC":  [
+                        {
+                            "FullName":  "Single-error Correct, Double-error Detect Error Correcting Code",
+                            "Description":  "单纠双检纠错码"
+                        }
+                    ],
+    "System Fatal Error Event":  [
+                                     {
+                                         "FullName":  "System Fatal Error Event",
+                                         "Description":  "由硬件触发的错误隔离事件（在旧款处理器中称为\"sync flood\"）。FCH被配置为在发生系统致命错误事件时对系统执行热复位"
+                                     }
+                                 ],
+    "TSI":  [
+                {
+                    "FullName":  "Temperature Sensor Interface",
+                    "Description":  "温度传感器接口"
+                }
+            ],
+    "UMC":  [
+                {
+                    "FullName":  "Unified Memory Controller",
+                    "Description":  "统一内存控制器"
+                }
+            ],
+    "Uncore":  [
+                   {
+                       "FullName":  "Uncore",
+                       "Description":  "指处理器Core之外的处理器Socket的模块。Uncore包含CHA、M2M、Intel UPI、iMC、IVR、PCU、UBOX等；需要注意的是，IIO模块被视为Uncore之外，但它仍然集成在同一个Die内"
+                   }
+               ],
+    "VT-d":  [
+                 {
+                     "FullName":  "Intel Virtualization Technology For Directed I/O",
+                     "Description":  "英特尔定向I/O虚拟化技术"
+                 }
+             ],
+    "WHEA":  [
+                 {
+                     "FullName":  "Windows Hardware Error Architecture",
+                     "Description":  "Windows硬件错误架构"
+                 }
+             ],
+    "xHMI":  [
+                 {
+                     "FullName":  "External Hygon Memory Interconnect",
+                     "Description":  "外部海光内存互连，插槽间一致性互连"
+                 }
+             ]
 }
