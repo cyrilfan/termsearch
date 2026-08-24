@@ -74,7 +74,7 @@ tools/                   数据整理用的 PowerShell 脚本（见下）
 
 ## 工具脚本（`tools/`）
 
-两个 PowerShell 脚本，用来批量整理术语数据，跟主程序本身无关，手动按需运行。
+三个 PowerShell 脚本，用来批量整理术语数据，跟主程序本身无关，手动按需运行。
 
 ### `Convert-TmpToTerms.ps1`
 
@@ -94,4 +94,14 @@ tools\Convert-TmpToTerms.ps1 -InputPath 源文件.json -OutputPath 输出文件.
 tools\Merge-TermsFromText.ps1 -InputPath 词条.txt -OutputPath src\TermSearch\terms.json
 ```
 
-两个脚本都用大小写敏感的方式解析/合并 JSON（不是 PowerShell 自带的 `ConvertFrom-Json`），因为缩写本身可能存在只有大小写不同的两个不同词条（比如 `COT` 和 `CoT`）。
+### `Export-EmptyDescriptions.ps1`
+
+从 terms.json 格式的文件里挑出 `Description` 为空的词条，按同样的格式（缩写 -> 释义数组）输出到一个独立的文件，方便集中补充释义。同一缩写下已经写好的释义不会被带出来，输出文件只包含那些确实空着的条目。
+
+```powershell
+tools\Export-EmptyDescriptions.ps1 -InputPath src\TermSearch\terms.json -OutputPath terms_missing.json
+```
+
+补完释义后，可以人工合并回去，或者写成"缩略语~全称~描述"格式后用 `Merge-TermsFromText.ps1` 合并。
+
+三个脚本都用大小写敏感的方式解析/合并 JSON（不是 PowerShell 自带的 `ConvertFrom-Json`），因为缩写本身可能存在只有大小写不同的两个不同词条（比如 `COT` 和 `CoT`）。
