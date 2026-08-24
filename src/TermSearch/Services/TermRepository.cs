@@ -4,8 +4,26 @@ using TermSearch.Models;
 
 namespace TermSearch.Services;
 
+/// <summary>匹配档位：全部（精确）匹配 &gt; 前缀匹配 &gt; 模糊匹配，用于结果排序分组。</summary>
+public enum MatchTier
+{
+    Exact = 0,
+    Prefix = 1,
+    Fuzzy = 2,
+}
+
+/// <summary>一条查询结果：命中的缩写、词条、匹配档位，以及（模糊匹配时）命中字符位置和匹配得分。</summary>
+public class SearchResult
+{
+    public required string Key { get; init; }
+    public required TermEntry Entry { get; init; }
+    public MatchTier Tier { get; init; }
+    public int[] MatchedIndices { get; init; } = Array.Empty<int>();
+    public int Score { get; init; }
+}
+
 /// <summary>
-/// 负责 terms.json 的加载、保存、前缀匹配查询，以及外部编辑后的自动热重载（需求文档第 8.1 节）。
+/// 负责 terms.json 的加载、保存、查询（全部/前缀/模糊三档匹配），以及外部编辑后的自动热重载（需求文档第 8.1 节）。
 /// </summary>
 public class TermRepository : IDisposable
 {
@@ -68,36 +86,120 @@ public class TermRepository : IDisposable
     }
 
     /// <summary>
-    /// 大小写不敏感的前缀匹配。完全匹配的词条排在前面，其余按 key 字母顺序排列。
+    /// 大小写不敏感的三档匹配：全部（精确）匹配 &gt; 前缀匹配 &gt; 模糊匹配（子序列匹配，按匹配质量得分排序）。
+    /// 每个缩写只归入其中最高的一档，不会在多档重复出现。
     /// </summary>
-    public List<(string Key, TermEntry Entry)> FindByPrefix(string prefix)
+    public List<SearchResult> Search(string query)
     {
-        if (string.IsNullOrEmpty(prefix)) return new List<(string, TermEntry)>();
+        if (string.IsNullOrEmpty(query)) return new List<SearchResult>();
 
         lock (_lock)
         {
-            var results = new List<(string Key, TermEntry Entry)>();
+            var exact = new List<SearchResult>();
+            var prefix = new List<SearchResult>();
+            var fuzzy = new List<SearchResult>();
+
             foreach (var kv in _terms)
             {
-                if (kv.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                var key = kv.Key;
+                MatchTier tier;
+                int[] matchedIndices;
+                int score = 0;
+
+                if (string.Equals(key, query, StringComparison.OrdinalIgnoreCase))
                 {
-                    foreach (var entry in kv.Value)
+                    tier = MatchTier.Exact;
+                    matchedIndices = Enumerable.Range(0, key.Length).ToArray();
+                }
+                else if (key.StartsWith(query, StringComparison.OrdinalIgnoreCase))
+                {
+                    tier = MatchTier.Prefix;
+                    matchedIndices = Enumerable.Range(0, query.Length).ToArray();
+                }
+                else if (TryFuzzyMatch(key, query, out matchedIndices, out score))
+                {
+                    tier = MatchTier.Fuzzy;
+                }
+                else
+                {
+                    continue;
+                }
+
+                var bucket = tier switch
+                {
+                    MatchTier.Exact => exact,
+                    MatchTier.Prefix => prefix,
+                    _ => fuzzy,
+                };
+
+                foreach (var entry in kv.Value)
+                {
+                    bucket.Add(new SearchResult
                     {
-                        results.Add((kv.Key, entry));
-                    }
+                        Key = key,
+                        Entry = entry,
+                        Tier = tier,
+                        MatchedIndices = matchedIndices,
+                        Score = score,
+                    });
                 }
             }
 
-            results.Sort((a, b) =>
-            {
-                bool aExact = string.Equals(a.Key, prefix, StringComparison.OrdinalIgnoreCase);
-                bool bExact = string.Equals(b.Key, prefix, StringComparison.OrdinalIgnoreCase);
-                if (aExact != bExact) return aExact ? -1 : 1;
-                return string.Compare(a.Key, b.Key, StringComparison.OrdinalIgnoreCase);
-            });
+            exact.Sort((a, b) => string.Compare(a.Key, b.Key, StringComparison.OrdinalIgnoreCase));
+            prefix.Sort((a, b) => string.Compare(a.Key, b.Key, StringComparison.OrdinalIgnoreCase));
+            fuzzy.Sort((a, b) => b.Score != a.Score
+                ? b.Score - a.Score
+                : string.Compare(a.Key, b.Key, StringComparison.OrdinalIgnoreCase));
 
+            var results = new List<SearchResult>(exact.Count + prefix.Count + fuzzy.Count);
+            results.AddRange(exact);
+            results.AddRange(prefix);
+            results.AddRange(fuzzy);
             return results;
         }
+    }
+
+    /// <summary>
+    /// 子序列模糊匹配（类似 fzf/Sublime 命令面板）：query 的每个字符需按顺序（可跳过中间字符）出现在 key 里。
+    /// 命中字符越连续、起始位置越靠前、key 本身越短，得分越高，用于同档内排序。
+    /// </summary>
+    private static bool TryFuzzyMatch(string key, string query, out int[] matchedIndices, out int score)
+    {
+        matchedIndices = Array.Empty<int>();
+        score = 0;
+
+        if (query.Length == 0 || query.Length > key.Length) return false;
+
+        var indices = new int[query.Length];
+        int keyIdx = 0;
+        for (int qIdx = 0; qIdx < query.Length; qIdx++)
+        {
+            char qc = char.ToUpperInvariant(query[qIdx]);
+            bool found = false;
+            while (keyIdx < key.Length)
+            {
+                if (char.ToUpperInvariant(key[keyIdx]) == qc)
+                {
+                    indices[qIdx] = keyIdx;
+                    keyIdx++;
+                    found = true;
+                    break;
+                }
+                keyIdx++;
+            }
+            if (!found) return false;
+        }
+
+        matchedIndices = indices;
+
+        int consecutiveBonus = 0;
+        for (int i = 1; i < indices.Length; i++)
+        {
+            if (indices[i] == indices[i - 1] + 1) consecutiveBonus += 3;
+        }
+
+        score = (consecutiveBonus * 10) - indices[0] - key.Length;
+        return true;
     }
 
     /// <summary>

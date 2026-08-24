@@ -15,6 +15,7 @@ public class TrayIconManager : IDisposable
     public event Action? OpenTermsRequested;
     public event Action? ReloadRequested;
     public event Action? ChangeHotkeyRequested;
+    public event Action? ChangeAddVariantHotkeyRequested;
     public event Action? ExitRequested;
     public event Action<bool>? StartWithWindowsToggled;
 
@@ -35,6 +36,10 @@ public class TrayIconManager : IDisposable
         var changeHotkeyItem = new ToolStripMenuItem("修改全局热键...");
         changeHotkeyItem.Click += (_, _) => ChangeHotkeyRequested?.Invoke();
         menu.Items.Add(changeHotkeyItem);
+
+        var changeAddVariantHotkeyItem = new ToolStripMenuItem("修改新增全称快捷键...");
+        changeAddVariantHotkeyItem.Click += (_, _) => ChangeAddVariantHotkeyRequested?.Invoke();
+        menu.Items.Add(changeAddVariantHotkeyItem);
 
         menu.Items.Add(new ToolStripSeparator());
 

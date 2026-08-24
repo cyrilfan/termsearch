@@ -73,11 +73,33 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel>
-                                <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#FF1F2329">
-                                    <Run Text="{Binding Key, Mode=OneWay}"/>
-                                    <Run Text=" — "/>
-                                    <Run Text="{Binding Entry.FullName, Mode=OneWay}"/>
-                                </TextBlock>
+                                <StackPanel Orientation="Horizontal">
+                                    <ItemsControl ItemsSource="{Binding KeySegments}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Text, Mode=OneWay}" FontSize="16" FontWeight="SemiBold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="#FF1F2329"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsMatch}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#FF2B6CE0"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text=" — " FontSize="16" FontWeight="SemiBold" Foreground="#FF1F2329"/>
+                                    <TextBlock Text="{Binding Entry.FullName, Mode=OneWay}" FontSize="16" FontWeight="SemiBold" Foreground="#FF1F2329"/>
+                                </StackPanel>
                                 <TextBlock Text="{Binding Entry.Description, Mode=OneWay}"
                                            FontSize="13"
                                            Foreground="#FF6B7075"
@@ -88,6 +110,12 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+
+                <TextBlock x:Name="AddVariantHintText"
+                           FontSize="12"
+                           Foreground="#FF9AA0A6"
+                           Margin="0,6,0,0"
+                           Visibility="Collapsed"/>
             </StackPanel>
 
             <!-- 快捷补充面板 -->

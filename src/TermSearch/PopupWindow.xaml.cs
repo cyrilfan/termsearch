@@ -15,14 +15,16 @@ namespace TermSearch;
 public partial class PopupWindow : Window
 {
     private readonly TermRepository _repository;
-    private List<(string Key, TermEntry Entry)> _currentMatches = new();
+    private readonly ConfigManager _configManager;
+    private List<SearchResult> _currentMatches = new();
     private bool _addMode;
     private string _pendingKey = "";
 
-    public PopupWindow(TermRepository repository)
+    public PopupWindow(TermRepository repository, ConfigManager configManager)
     {
         InitializeComponent();
         _repository = repository;
+        _configManager = configManager;
     }
 
     public void ShowAtFixedPosition()
@@ -46,7 +48,7 @@ public partial class PopupWindow : Window
     {
         _addMode = false;
         _pendingKey = "";
-        _currentMatches = new List<(string, TermEntry)>();
+        _currentMatches = new List<SearchResult>();
 
         SearchBox.Text = "";
         AddPanel.Visibility = Visibility.Collapsed;
@@ -54,6 +56,7 @@ public partial class PopupWindow : Window
         ResultsList.ItemsSource = null;
         ResultsList.Visibility = Visibility.Collapsed;
         HintText.Visibility = Visibility.Collapsed;
+        AddVariantHintText.Visibility = Visibility.Collapsed;
     }
 
     private void SearchBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -65,21 +68,24 @@ public partial class PopupWindow : Window
     private void UpdateResults(string query)
     {
         _currentMatches = string.IsNullOrEmpty(query)
-            ? new List<(string, TermEntry)>()
-            : _repository.FindByPrefix(query);
+            ? new List<SearchResult>()
+            : _repository.Search(query);
 
         if (_currentMatches.Count > 0)
         {
-            ResultsList.ItemsSource = _currentMatches.Select(m => new ResultRow(m.Key, m.Entry)).ToList();
+            ResultsList.ItemsSource = _currentMatches.Select(m => new ResultRow(m)).ToList();
             ResultsList.SelectedIndex = 0;
             ResultsList.Visibility = Visibility.Visible;
             HintText.Visibility = Visibility.Collapsed;
+            AddVariantHintText.Text = $"{_configManager.Config.AddVariantHotkey} 追加新全称";
+            AddVariantHintText.Visibility = Visibility.Visible;
         }
         else
         {
             ResultsList.ItemsSource = null;
             ResultsList.Visibility = Visibility.Collapsed;
             HintText.Visibility = string.IsNullOrEmpty(query) ? Visibility.Collapsed : Visibility.Visible;
+            AddVariantHintText.Visibility = Visibility.Collapsed;
         }
     }
 
@@ -94,6 +100,20 @@ public partial class PopupWindow : Window
         }
 
         if (_addMode) return; // 补充模式下的 Enter 由各输入框自己的 KeyDown 处理
+
+        // 可配置的“追加新全称”快捷键（默认 Shift+Enter）：无论当前有没有匹配结果，
+        // 都以当前输入框文本作为缩写进入补充模式。放在 Down/Up/Enter 判断之前，
+        // 避免用户把它配置成类似 Shift+Down 这种会和内置导航键冲突的组合时被内置逻辑抢先处理。
+        if (IsAddVariantHotkey(e.Key, Keyboard.Modifiers))
+        {
+            var query = SearchBox.Text.Trim();
+            if (!string.IsNullOrEmpty(query))
+            {
+                EnterAddMode(query);
+            }
+            e.Handled = true;
+            return;
+        }
 
         if (e.Key == Key.Down)
         {
@@ -110,6 +130,16 @@ public partial class PopupWindow : Window
             HandleEnterInSearch();
             e.Handled = true;
         }
+    }
+
+    private bool IsAddVariantHotkey(Key key, System.Windows.Input.ModifierKeys modifiers)
+    {
+        if (!KeyComboParser.TryParse(_configManager.Config.AddVariantHotkey, out var comboModifiers, out var comboKey))
+        {
+            return false;
+        }
+
+        return key == comboKey && modifiers == comboModifiers;
     }
 
     private void MoveSelection(int delta)
@@ -210,15 +240,64 @@ public partial class PopupWindow : Window
 /// <summary>结果列表的展示行，供 XAML 数据绑定使用。</summary>
 public class ResultRow
 {
-    public ResultRow(string key, TermEntry entry)
+    public ResultRow(SearchResult result)
     {
-        Key = key;
-        Entry = entry;
+        Key = result.Key;
+        Entry = result.Entry;
+        KeySegments = BuildKeySegments(result);
     }
 
     public string Key { get; }
     public TermEntry Entry { get; }
 
+    /// <summary>缩写按"是否命中"切分出的片段，用于模糊匹配结果的高亮显示。</summary>
+    public List<KeySegment> KeySegments { get; }
+
     public Visibility DescriptionVisibility =>
         string.IsNullOrEmpty(Entry.Description) ? Visibility.Collapsed : Visibility.Visible;
+
+    // 全部/前缀匹配已经足够直观（命中位置显而易见），只对模糊匹配做高亮，避免界面显得杂乱。
+    private static List<KeySegment> BuildKeySegments(SearchResult result)
+    {
+        if (result.Tier != MatchTier.Fuzzy || result.MatchedIndices.Length == 0)
+        {
+            return new List<KeySegment> { new KeySegment(result.Key, false) };
+        }
+
+        var matched = new HashSet<int>(result.MatchedIndices);
+        var segments = new List<KeySegment>();
+        var buffer = new System.Text.StringBuilder();
+        bool? bufferIsMatch = null;
+
+        for (int i = 0; i < result.Key.Length; i++)
+        {
+            bool isMatch = matched.Contains(i);
+            if (bufferIsMatch is not null && bufferIsMatch != isMatch)
+            {
+                segments.Add(new KeySegment(buffer.ToString(), bufferIsMatch.Value));
+                buffer.Clear();
+            }
+            buffer.Append(result.Key[i]);
+            bufferIsMatch = isMatch;
+        }
+        if (buffer.Length > 0)
+        {
+            segments.Add(new KeySegment(buffer.ToString(), bufferIsMatch!.Value));
+        }
+
+        return segments;
+    }
+}
+
+/// <summary>缩写文本中的一段连续片段，标记这段是否命中了模糊匹配的查询字符。</summary>
+public class KeySegment
+{
+    public KeySegment(string text, bool isMatch)
+    {
+        Text = text;
+        IsMatch = isMatch;
+    }
+
+    public string Text { get; }
+    public bool IsMatch { get; }
 }

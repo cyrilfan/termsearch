@@ -14,10 +14,11 @@ public partial class HotkeySettingWindow : Window
     private readonly Func<string, (bool Success, string? Error)> _tryApply;
     private string? _capturedHotkey;
 
-    public HotkeySettingWindow(string currentHotkey, Func<string, (bool Success, string? Error)> tryApply)
+    public HotkeySettingWindow(string currentHotkey, Func<string, (bool Success, string? Error)> tryApply, string title = "修改全局热键")
     {
         InitializeComponent();
         _tryApply = tryApply;
+        Title = title;
         CaptureBox.Text = currentHotkey;
         Loaded += (_, _) =>
         {

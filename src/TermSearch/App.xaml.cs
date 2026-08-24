@@ -52,7 +52,7 @@ public partial class App : Application
 
         _termRepository = new TermRepository(TermsPath);
         _configManager = new ConfigManager(ConfigPath);
-        _popupWindow = new PopupWindow(_termRepository);
+        _popupWindow = new PopupWindow(_termRepository, _configManager);
 
         _hotkeyManager = new HotkeyManager();
         _hotkeyManager.HotkeyPressed += () => Dispatcher.Invoke(ShowPopup);
@@ -62,6 +62,7 @@ public partial class App : Application
         _trayIconManager.OpenTermsRequested += OpenTermsFile;
         _trayIconManager.ReloadRequested += ReloadTerms;
         _trayIconManager.ChangeHotkeyRequested += OpenHotkeySettings;
+        _trayIconManager.ChangeAddVariantHotkeyRequested += OpenAddVariantHotkeySettings;
         _trayIconManager.StartWithWindowsToggled += OnStartWithWindowsToggled;
         _trayIconManager.ExitRequested += () => Shutdown();
     }
@@ -135,7 +136,7 @@ public partial class App : Application
     private void OpenHotkeySettings()
     {
         var current = _configManager!.Config.Hotkey;
-        var window = new HotkeySettingWindow(current, TryChangeHotkey);
+        var window = new HotkeySettingWindow(current, TryChangeHotkey, "修改全局热键");
         window.ShowDialog();
     }
 
@@ -150,6 +151,11 @@ public partial class App : Application
             return (true, null);
         }
 
+        if (string.Equals(newHotkey, _configManager.Config.AddVariantHotkey, StringComparison.OrdinalIgnoreCase))
+        {
+            return (false, "不能和「新增全称」快捷键相同，请更换一个。");
+        }
+
         bool ok = _hotkeyManager!.Register(newHotkey);
         if (!ok)
         {
@@ -160,6 +166,34 @@ public partial class App : Application
         _configManager.Config.Hotkey = newHotkey;
         _configManager.Save();
         _trayIconManager?.ShowBalloon("术语速查", $"全局热键已更新为 {newHotkey}");
+        return (true, null);
+    }
+
+    private void OpenAddVariantHotkeySettings()
+    {
+        var current = _configManager!.Config.AddVariantHotkey;
+        var window = new HotkeySettingWindow(current, TryChangeAddVariantHotkey, "修改新增全称快捷键");
+        window.ShowDialog();
+    }
+
+    /// <summary>
+    /// 与全局热键不同，这是弹窗内的局部按键，不需要向系统注册，只需保证和全局热键不撞车即可。
+    /// </summary>
+    private (bool Success, string? Error) TryChangeAddVariantHotkey(string newHotkey)
+    {
+        if (string.Equals(newHotkey, _configManager!.Config.AddVariantHotkey, StringComparison.OrdinalIgnoreCase))
+        {
+            return (true, null);
+        }
+
+        if (string.Equals(newHotkey, _configManager.Config.Hotkey, StringComparison.OrdinalIgnoreCase))
+        {
+            return (false, "不能和全局热键相同，请更换一个。");
+        }
+
+        _configManager.Config.AddVariantHotkey = newHotkey;
+        _configManager.Save();
+        _trayIconManager?.ShowBalloon("术语速查", $"新增全称快捷键已更新为 {newHotkey}");
         return (true, null);
     }
 
