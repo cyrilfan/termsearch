@@ -14,3 +14,6 @@ termsearch.log
 # 常见系统/编辑器垃圾文件
 Thumbs.db
 .DS_Store
+
+# 打包出来准备上传到 GitHub Release 的绿色版压缩包，不需要入库
+*.zip
