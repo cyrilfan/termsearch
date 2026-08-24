@@ -24,11 +24,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- CopyToOutputDirectory 只保证 dotnet build 会带上这两个文件；PublishSingleFile 场景下
+         dotnet publish 的发布目录另有一套判断逻辑，观察到 terms.json（体积较大）有时不会
+         被带进 publish\ 目录，因此显式加上 CopyToPublishDirectory 保证两个数据文件在发布产物里都在。 -->
     <None Update="terms.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
     <None Update="config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
   </ItemGroup>
 
