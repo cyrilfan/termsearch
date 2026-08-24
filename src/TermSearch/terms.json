@@ -1023,6 +1023,10 @@
                 {
                     "FullName":  "Counter with CBC-MAC Mode",
                     "Description":  "在CBC和CTR基础上增加CMAC算法校验"
+                },
+                {
+                    "FullName":  "CPU Coherence Master",
+                    "Description":  "CPU一致性主控单元,作为一致性协议中的发起方,负责管理和协调缓存一致性操作。"
                 }
             ],
     "CCN":  [
@@ -1046,7 +1050,7 @@
     "CCX":  [
                 {
                     "FullName":  "Core Complex/CPU Complex",
-                    "Description":  "AMD处理器中由若干CPU核心及共享缓存组成的核心簇"
+                    "Description":  "AMD Zen架构中的基本构件模块, 由若干CPU核心及共享缓存组成的核心簇"
                 }
             ],
     "CDC":  [
@@ -1445,6 +1449,10 @@
                {
                    "FullName":  "Commercial Sample",
                    "Description":  "商用样品"
+               },
+               {
+                   "FullName":  "Coherence Slave",
+                   "Description":  "一致性从设备,在缓存一致性协议中作为目标端响应来自主控的一致性请求。"
                }
            ],
     "CSDF":  [
@@ -4151,6 +4159,10 @@
                 {
                     "FullName":  "Human Machine Interface",
                     "Description":  "人机交互界面，供操作人员与设备/系统进行交互的接口"
+                },
+                {
+                    "FullName":  "Hygone Multi-chip Interconnect",
+                    "Description":  "海光多芯片互连技术,用于在处理器封装内多个芯片裸片之间建立高速通信连接。"
                 }
             ],
     "HN":  [
@@ -4632,7 +4644,7 @@
                 },
                 {
                     "FullName":  "Interrupt Translation Service",
-                    "Description":  "ARM GIC架构中负责将基于消息的中断（如LPI）翻译并路由到目标核心的服务"
+                    "Description":  "中断转换服务, ARM GIC中的功能模块,负责将基于消息的中断（MSI）翻译并路由为LPI中断"
                 }
             ],
     "IU":  [
@@ -5437,6 +5449,10 @@
                 {
                     "FullName":  "Material Review Board",
                     "Description":  "物料审视委员会"
+                },
+                {
+                    "FullName":  "TLB Miss Request Buffer",
+                    "Description":  "TLB缺失请求缓冲区,用于在页表遍历期间暂存由TLB缺失触发的待处理请求。"
                 }
             ],
     "MRD":  [
@@ -6109,6 +6125,10 @@
                 {
                     "FullName":  "Intel SGX Provisioning Certification Service",
                     "Description":  "Intel提供的SGX证书签发与管理服务"
+                },
+                {
+                    "FullName":  "Physical Coding Sublayer",
+                    "Description":  "物理编码子层"
                 }
             ],
     "PCSA":  [
@@ -6271,6 +6291,10 @@
                 {
                     "FullName":  "Process Integration Engineer",
                     "Description":  "工艺工程，负责wafer工艺相关业务PDK的开发、导入，工艺主线的建设和工艺可靠性验证"
+                },
+                {
+                    "FullName":  "Power Management、Interrupt、Etcetera",
+                    "Description":  "电源管理、中断及杂项功能的集成模块,将电源管理、中断处理和其他控制功能整合在一个统一模块中。"
                 }
             ],
     "PIK":  [
@@ -6643,12 +6667,6 @@
                      "Description":  "平台级信任根，是整个平台安全信任链的起点"
                  }
              ],
-    "PS":  [
-               {
-                   "FullName":  "",
-                   "Description":  ""
-               }
-           ],
     "PSA":  [
                 {
                     "FullName":  "Platform Security Architecture",
@@ -7609,6 +7627,10 @@
                 {
                     "FullName":  "Sensor Control Framework",
                     "Description":  "用于统一管理和控制各类传感器的软件框架"
+                },
+                {
+                    "FullName":  "Scalable Control Fabric",
+                    "Description":  "可扩展控制平面,用于片上系统中配置、管理和控制信号传输的可伸缩网络架构。"
                 }
             ],
     "SCG":  [
@@ -10473,10 +10495,232 @@
                     "Description":  "描述芯片与芯片之间互连通信方式的统称"
                 }
             ],
-    "":  [
-             {
-                 "FullName":  "",
-                 "Description":  ""
-             }
-         ]
+    "SAN":  [
+                {
+                    "FullName":  "Storage Area Network",
+                    "Description":  "存储区域网络,一种提供块级共享存储访问的高速专用网络,服务器通过它连接外部存储设备。"
+                }
+            ],
+    "OCN":  [
+                {
+                    "FullName":  "Optical Circuit Network",
+                    "Description":  "光电路交换网络,使用光纤和电路交换技术实现高带宽、低能耗的数据传输网络架构。"
+                }
+            ],
+    "DF":  [
+               {
+                   "FullName":  "Data Fabric",
+                   "Description":  "数据互连矩阵,AMD片上系统中的中央互连结构,负责连接CPU核心、内存控制器和I/O模块并传输数据。"
+               }
+           ],
+    "FTI":  [
+                {
+                    "FullName":  "Fabric Transport Interface",
+                    "Description":  "互连传输层接口,负责处理系统总线上的传输层协议,提供可靠的数据传输服务。"
+                }
+            ],
+    "TCDX":  [
+                 {
+                     "FullName":  "Transport Command and Data Xbar Switch",
+                     "Description":  "传输命令与数据交叉开关,一种在系统互连各部件之间路由传输命令和数据的高速交换结构。"
+                 }
+             ],
+    "SPF":  [
+                {
+                    "FullName":  "Snoop Filter",
+                    "Description":  "探听过滤器,通过跟踪缓存行的归属状态来减少不必要的跨核心/跨插槽探听流量,降低一致性开销。"
+                }
+            ],
+    "CAKE":  [
+                 {
+                     "FullName":  "Coherent Access Socket Extender",
+                     "Description":  "一致性访问插槽扩展器,用于扩展跨插槽或芯片边界的缓存一致性访问,实现多插槽系统的一致性互连。"
+                 }
+             ],
+    "APIC":  [
+                 {
+                     "FullName":  "Advanced Programmable Interrupt Controller",
+                     "Description":  "高级可编程中断控制器,Intel架构中用于管理和优先化中断的控制器,支持多核处理器的中断分发。"
+                 }
+             ],
+    "SMN":  [
+                {
+                    "FullName":  "System Management Network",
+                    "Description":  "系统管理网络,片上系统中专用于系统管理、配置和控制操作的专用网络结构。"
+                }
+            ],
+    "SDF":  [
+                {
+                    "FullName":  "Scalable Data Fabric",
+                    "Description":  "可扩展数据互连矩阵,一种可伸缩的数据互连架构,用于承载片上系统中的高带宽数据流量。"
+                }
+            ],
+    "NBIO":  [
+                 {
+                     "FullName":  "North Bridge I/O",
+                     "Description":  "北桥I/O模块,负责处理PCIe等高速I/O接口并连接到CPU互连矩阵,相当于传统北桥的I/O功能部分。"
+                 }
+             ],
+    "L3M":  [
+                {
+                    "FullName":  "L3 Macro",
+                    "Description":  "三级缓存宏单元,处理器设计中L3缓存的物理实现宏模块,通常以可复用的硬宏形式存在。"
+                }
+            ],
+    "L3S_CTL":  [
+                    {
+                        "FullName":  "L3 Slice Control",
+                        "Description":  "三级缓存分片控制器,在分布式L3缓存架构中管理单个L3分片的控制逻辑。"
+                    }
+                ],
+    "STM":  [
+                {
+                    "FullName":  "Shadow Tag Mask",
+                    "Description":  "影子标签掩码,使用影子标签和掩码机制来辅助缓存一致性跟踪或缓存路预测。"
+                }
+            ],
+    "HQM":  [
+                {
+                    "FullName":  "Hygon QoS Monitoring",
+                    "Description":  "海光服务质量监控,海光处理器中用于跟踪资源使用情况、支持服务质量管理的监控功能模块。"
+                }
+            ],
+    "HQE":  [
+                {
+                    "FullName":  "Hygon QoS Enforcement",
+                    "Description":  "海光服务质量执行,海光处理器中按工作负载或分区分配和限制资源使用的QoS执行机制。"
+                }
+            ],
+    "RMM":  [
+                {
+                    "FullName":  "Resource Monitoring and Management",
+                    "Description":  "资源监控与管理,一个监控系统资源使用并管理其分配以提升效率和公平性的框架。"
+                }
+            ],
+    "BPV":  [
+                {
+                    "FullName":  "Bond Pad Via",
+                    "Description":  "键合焊盘过孔,芯片封装中用于通过过孔将裸片焊盘连接到封装基板的结构。"
+                }
+            ],
+    "CCD":  [
+                {
+                    "FullName":  "Core Chiplet Die",
+                    "Description":  "核心小芯片裸片,AMD模块化小芯片架构中包含CPU核心和缓存的计算裸片,通过总线与I/O裸片连接。"
+                }
+            ],
+    "XSI":  [
+                {
+                    "FullName":  "compleX System Interface",
+                    "Description":  "interfacing the CPU complex to the rest of the System"
+                }
+            ],
+    "SPO":  [
+                {
+                    "FullName":  "Speculative Page Open",
+                    "Description":  "推测性页打开,一种内存优化技术,在预测到的访问发生前提前打开DRAM页以降低访问延迟。"
+                }
+            ],
+    "CME":  [
+                {
+                    "FullName":  "Correct Message Error",
+                    "Description":  "L2 CME include ecc scrub or hardwre flush"
+                }
+            ],
+    "PHY":  [
+                {
+                    "FullName":  "Physical Layer",
+                    "Description":  "物理层"
+                }
+            ],
+    "SMU":  [
+                {
+                    "FullName":  "System Management Controller Unit/System Management Unit",
+                    "Description":  "系统管理单元"
+                }
+            ],
+    "AGU":  [
+                {
+                    "FullName":  "Address Generation Unit",
+                    "Description":  "地址生成单元,CPU中负责为加载和存储指令计算有效内存地址的执行单元。"
+                }
+            ],
+    "LPT":  [
+                {
+                    "FullName":  "Load Predict Table",
+                    "Description":  "加载预测表,用于预测内存访问模式并优化加载指令调度的表结构,以减少加载延迟。"
+                }
+            ],
+    "LRQ":  [
+                {
+                    "FullName":  "Load Repick/Replay Queue",
+                    "Description":  "加载重选/重放队列,管理因冲突或缺失而需要重新调度或重放的加载指令的队列。"
+                }
+            ],
+    "FAB":  [
+                {
+                    "FullName":  "Fill Address Buffer",
+                    "Description":  "填充地址缓冲区,在从内存获取数据期间,暂存缓存行填充操作的目标地址。"
+                }
+            ],
+    "FDB":  [
+                {
+                    "FullName":  "Fill Data Buffer",
+                    "Description":  "填充数据缓冲区,在将取回的数据写入缓存之前,临时存放待填充缓存行数据的缓冲结构。"
+                }
+            ],
+    "SAB":  [
+                {
+                    "FullName":  "Store Address Buffer",
+                    "Description":  "存储地址缓冲区,CPU加载存储队列中用于暂存待处理存储操作地址的缓冲结构。"
+                }
+            ],
+    "SDB":  [
+                {
+                    "FullName":  "Store Data Buffer",
+                    "Description":  "存储数据缓冲区,用于暂存待处理存储操作的数据,在写入缓存或内存前临时保存。"
+                }
+            ],
+    "RST":  [
+                {
+                    "FullName":  "Recently Store Tag",
+                    "Description":  "最近存储标签,跟踪最近写入的缓存行标签的结构,用于存储到加载转发或一致性跟踪。"
+                }
+            ],
+    "MB":  [
+               {
+                   "FullName":  "Merge Buffer",
+                   "Description":  "合并缓冲区,将多个较小的存储操作合并为单次更大的写入,以提高内存访问效率。"
+               }
+           ],
+    "WPT":  [
+                {
+                    "FullName":  "Watchpoint",
+                    "Description":  "观察点,一种调试机制,当特定内存位置被访问或修改时触发异常,用于软件调试。"
+                }
+            ],
+    "MA":  [
+               {
+                   "FullName":  "Mis-Align/unalign",
+                   "Description":  "非对齐访问,指未按自然边界对齐的内存访问(如4字节访问不位于4字节对齐地址),通常需要额外硬件处理。"
+               }
+           ],
+    "XP":  [
+               {
+                   "FullName":  "Cross Page",
+                   "Description":  "跨页访问,指跨越内存页边界的内存访问,需要进行额外的地址转换和处理步骤。"
+               }
+           ],
+    "ODB":  [
+                {
+                    "FullName":  "Atomic Old Data",
+                    "Description":  "原子旧数据缓冲,在原子读-改-写操作中保存原始数据值的缓冲结构,用于保证操作的原子性。"
+                }
+            ],
+    "FOF":  [
+                {
+                    "FullName":  "Fault-only-first",
+                    "Description":  "仅首个故障,一种故障处理机制,在向量化或批量操作中仅报告第一个发生的故障,其余延迟处理。"
+                }
+            ]
 }
