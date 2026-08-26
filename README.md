@@ -74,7 +74,7 @@ tools/                   数据整理用的 PowerShell 脚本（见下）
 
 ## 工具脚本（`tools/`）
 
-四个 PowerShell 脚本，用来批量整理术语数据，跟主程序本身无关，手动按需运行。
+五个 PowerShell 脚本，用来批量整理术语数据，跟主程序本身无关，手动按需运行。
 
 ### `Convert-TmpToTerms.ps1`
 
@@ -112,4 +112,14 @@ tools\Export-EmptyDescriptions.ps1 -InputPath src\TermSearch\terms.json -OutputP
 tools\Merge-TermsFiles.ps1 -File1Path f1.json -File2Path f2.json
 ```
 
-四个脚本都用大小写敏感的方式解析/合并 JSON（不是 PowerShell 自带的 `ConvertFrom-Json`），因为缩写本身可能存在只有大小写不同的两个不同词条（比如 `COT` 和 `CoT`）。
+### `Sync-TermsWithRepo.ps1`
+
+多台设备共用同一份术语表时用的同步脚本：把"本机部署文件夹里的 terms.json"和"git 仓库里的 terms.json"双向对齐。流程是 `git pull` 拉最新版 → 按跟 `Merge-TermsFiles.ps1` 一致的规则算出两者并集（仓库版本为基准，缩写+全称都重复且两边都有内容时保留仓库那条，跳过并打印到屏幕）→ 把并集分别写回仓库那份和本机部署那份，两边就完全一致了 → 只有仓库内容真的变化了才 `commit` + `push`，不会产生空提交。仓库工作目录如果有未提交的改动，会直接中止、不做任何覆盖。
+
+```powershell
+tools\Sync-TermsWithRepo.ps1 -DeployedTermsPath "D:\Apps\TermSearch\terms.json"
+```
+
+在每台设备上，用完准备切换到别的设备之前（或者切换过来准备用之前），跑一下这个脚本就行。仓库路径按脚本自身在 `tools\` 目录下的位置自动推导，不用手动指定；只有 `-DeployedTermsPath`（本机部署的 terms.json 路径）每台设备可能不一样，需要传。
+
+五个脚本都用大小写敏感的方式解析/合并 JSON（不是 PowerShell 自带的 `ConvertFrom-Json`），因为缩写本身可能存在只有大小写不同的两个不同词条（比如 `COT` 和 `CoT`）。
