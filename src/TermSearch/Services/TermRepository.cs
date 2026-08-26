@@ -225,6 +225,36 @@ public class TermRepository : IDisposable
         TermsReloaded?.Invoke();
     }
 
+    /// <summary>
+    /// 编辑某个已存在词条的全称/解释（原地替换，不新增条目）。用查询结果里那个具体的
+    /// <see cref="TermEntry"/> 对象引用来定位要改哪一条，而不是按内容匹配——这样即使同一
+    /// 缩写下有两条内容完全一样的记录，改的也一定是用户当时选中的那一条，不会认错。
+    /// 如果这期间术语表被外部编辑过（引用已经不在当前数据里了），返回 false，不做任何改动。
+    /// </summary>
+    public bool UpdateTerm(string key, TermEntry originalEntry, string newFullName, string newDescription)
+    {
+        lock (_lock)
+        {
+            var existingKey = _terms.Keys.FirstOrDefault(k => string.Equals(k, key, StringComparison.OrdinalIgnoreCase));
+            if (existingKey == null || !_terms.TryGetValue(existingKey, out var list))
+            {
+                return false;
+            }
+
+            var index = list.FindIndex(e => ReferenceEquals(e, originalEntry));
+            if (index < 0)
+            {
+                return false;
+            }
+
+            list[index] = new TermEntry { FullName = newFullName, Description = newDescription };
+            SaveInternal();
+        }
+
+        TermsReloaded?.Invoke();
+        return true;
+    }
+
     private void SaveInternal()
     {
         try

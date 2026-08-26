@@ -26,6 +26,7 @@ public partial class App : Application
     private HotkeyManager? _hotkeyManager;
     private TrayIconManager? _trayIconManager;
     private PopupWindow? _popupWindow;
+    private UpdateAvailableWindow? _updateWindow;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -63,8 +64,13 @@ public partial class App : Application
         _trayIconManager.ReloadRequested += ReloadTerms;
         _trayIconManager.ChangeHotkeyRequested += OpenHotkeySettings;
         _trayIconManager.ChangeAddVariantHotkeyRequested += OpenAddVariantHotkeySettings;
+        _trayIconManager.ChangeEditEntryHotkeyRequested += OpenEditEntryHotkeySettings;
+        _trayIconManager.CheckForUpdateRequested += () => _ = CheckForUpdateAsync(showUpToDateMessage: true);
         _trayIconManager.StartWithWindowsToggled += OnStartWithWindowsToggled;
         _trayIconManager.ExitRequested += () => Shutdown();
+
+        // 启动时顺手异步查一下有没有新版本，不阻塞热键注册/弹窗响应速度；查不到/查失败都静默处理。
+        _ = CheckForUpdateAsync(showUpToDateMessage: false);
     }
 
     private static void NotifyExistingInstance()
@@ -156,6 +162,11 @@ public partial class App : Application
             return (false, "不能和「新增全称」快捷键相同，请更换一个。");
         }
 
+        if (string.Equals(newHotkey, _configManager.Config.EditEntryHotkey, StringComparison.OrdinalIgnoreCase))
+        {
+            return (false, "不能和「编辑词条」快捷键相同，请更换一个。");
+        }
+
         bool ok = _hotkeyManager!.Register(newHotkey);
         if (!ok)
         {
@@ -191,10 +202,86 @@ public partial class App : Application
             return (false, "不能和全局热键相同，请更换一个。");
         }
 
+        if (string.Equals(newHotkey, _configManager.Config.EditEntryHotkey, StringComparison.OrdinalIgnoreCase))
+        {
+            return (false, "不能和「编辑词条」快捷键相同，请更换一个。");
+        }
+
         _configManager.Config.AddVariantHotkey = newHotkey;
         _configManager.Save();
         _trayIconManager?.ShowBalloon("术语速查", $"新增全称快捷键已更新为 {newHotkey}");
         return (true, null);
+    }
+
+    private void OpenEditEntryHotkeySettings()
+    {
+        var current = _configManager!.Config.EditEntryHotkey;
+        var window = new HotkeySettingWindow(current, TryChangeEditEntryHotkey, "修改编辑词条快捷键");
+        window.ShowDialog();
+    }
+
+    /// <summary>
+    /// 同样是弹窗内的局部按键，不需要向系统注册，只需要保证和另外两个快捷键（全局热键、
+    /// 新增全称快捷键）都不撞车即可。
+    /// </summary>
+    private (bool Success, string? Error) TryChangeEditEntryHotkey(string newHotkey)
+    {
+        if (string.Equals(newHotkey, _configManager!.Config.EditEntryHotkey, StringComparison.OrdinalIgnoreCase))
+        {
+            return (true, null);
+        }
+
+        if (string.Equals(newHotkey, _configManager.Config.Hotkey, StringComparison.OrdinalIgnoreCase))
+        {
+            return (false, "不能和全局热键相同，请更换一个。");
+        }
+
+        if (string.Equals(newHotkey, _configManager.Config.AddVariantHotkey, StringComparison.OrdinalIgnoreCase))
+        {
+            return (false, "不能和「新增全称」快捷键相同，请更换一个。");
+        }
+
+        _configManager.Config.EditEntryHotkey = newHotkey;
+        _configManager.Save();
+        _trayIconManager?.ShowBalloon("术语速查", $"编辑词条快捷键已更新为 {newHotkey}");
+        return (true, null);
+    }
+
+    /// <summary>
+    /// 查询 GitHub 上是否有新版本。<paramref name="showUpToDateMessage"/> 区分是启动时的静默自动检查
+    /// （没有更新就什么都不说）还是用户手动点"检查更新..."（没有更新也要给个反馈，不能像没反应一样）。
+    /// 已经有更新提示窗口开着时不会重复弹一个。
+    /// </summary>
+    private async Task CheckForUpdateAsync(bool showUpToDateMessage)
+    {
+        if (showUpToDateMessage)
+        {
+            _trayIconManager?.ShowBalloon("术语速查", "正在检查更新...");
+        }
+
+        var info = await UpdateChecker.CheckForUpdateAsync();
+
+        await Dispatcher.InvokeAsync(() =>
+        {
+            if (info == null)
+            {
+                if (showUpToDateMessage)
+                {
+                    _trayIconManager?.ShowBalloon("术语速查", "当前已是最新版本。");
+                }
+                return;
+            }
+
+            if (_updateWindow != null)
+            {
+                _updateWindow.Activate();
+                return;
+            }
+
+            _updateWindow = new UpdateAvailableWindow(info);
+            _updateWindow.Closed += (_, _) => _updateWindow = null;
+            _updateWindow.Show();
+        });
     }
 
     private void OnStartWithWindowsToggled(bool enabled)

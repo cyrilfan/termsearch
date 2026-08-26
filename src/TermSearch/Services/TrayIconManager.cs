@@ -16,6 +16,8 @@ public class TrayIconManager : IDisposable
     public event Action? ReloadRequested;
     public event Action? ChangeHotkeyRequested;
     public event Action? ChangeAddVariantHotkeyRequested;
+    public event Action? ChangeEditEntryHotkeyRequested;
+    public event Action? CheckForUpdateRequested;
     public event Action? ExitRequested;
     public event Action<bool>? StartWithWindowsToggled;
 
@@ -40,6 +42,16 @@ public class TrayIconManager : IDisposable
         var changeAddVariantHotkeyItem = new ToolStripMenuItem("修改新增全称快捷键...");
         changeAddVariantHotkeyItem.Click += (_, _) => ChangeAddVariantHotkeyRequested?.Invoke();
         menu.Items.Add(changeAddVariantHotkeyItem);
+
+        var changeEditEntryHotkeyItem = new ToolStripMenuItem("修改编辑词条快捷键...");
+        changeEditEntryHotkeyItem.Click += (_, _) => ChangeEditEntryHotkeyRequested?.Invoke();
+        menu.Items.Add(changeEditEntryHotkeyItem);
+
+        menu.Items.Add(new ToolStripSeparator());
+
+        var checkForUpdateItem = new ToolStripMenuItem("检查更新...");
+        checkForUpdateItem.Click += (_, _) => CheckForUpdateRequested?.Invoke();
+        menu.Items.Add(checkForUpdateItem);
 
         menu.Items.Add(new ToolStripSeparator());
 

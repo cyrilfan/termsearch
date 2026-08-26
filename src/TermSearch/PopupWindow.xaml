@@ -118,14 +118,17 @@
                            Visibility="Collapsed"/>
             </StackPanel>
 
-            <!-- 快捷补充面板 -->
+            <!-- 快捷补充/编辑面板：新增词条和编辑已有词条共用同一套输入框，见 PopupWindow.xaml.cs 里的 _isEditMode。 -->
             <StackPanel x:Name="AddPanel" Margin="0,10,0,0" Visibility="Collapsed">
-                <TextBlock FontSize="14" Foreground="#FF6B7075">
-                    <Run Text="补充术语："/>
-                    <Run x:Name="AddKeyLabel" FontWeight="Bold" Foreground="#FF1F2329"/>
-                </TextBlock>
+                <TextBlock x:Name="AddPanelTitle" Text="补充术语" FontSize="14" Foreground="#FF6B7075"/>
 
-                <TextBlock Text="全称" FontSize="12" Foreground="#FF9AA0A6" Margin="0,10,0,2"/>
+                <TextBlock Text="缩写" FontSize="12" Foreground="#FF9AA0A6" Margin="0,10,0,2"/>
+                <TextBox x:Name="AddKeyBox" FontSize="16" Padding="6,4"
+                         BorderBrush="#FFD8DBE0" BorderThickness="1"
+                         inp:InputMethod.IsInputMethodEnabled="False"
+                         KeyDown="AddKeyBox_KeyDown"/>
+
+                <TextBlock Text="全称" FontSize="12" Foreground="#FF9AA0A6" Margin="0,8,0,2"/>
                 <TextBox x:Name="FullNameBox" FontSize="16" Padding="6,4"
                          BorderBrush="#FFD8DBE0" BorderThickness="1"
                          inp:InputMethod.IsInputMethodEnabled="False"
@@ -136,7 +139,7 @@
                          BorderBrush="#FFD8DBE0" BorderThickness="1"
                          KeyDown="DescriptionBox_KeyDown"/>
 
-                <TextBlock Text="按 Enter 保存，Esc 取消并关闭"
+                <TextBlock x:Name="AddPanelFooter" Text="按 Enter 保存，Esc 取消并关闭"
                            FontSize="12" Foreground="#FF9AA0A6" Margin="0,8,0,0"/>
             </StackPanel>
 

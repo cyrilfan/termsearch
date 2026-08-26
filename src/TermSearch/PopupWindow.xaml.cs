@@ -18,7 +18,9 @@ public partial class PopupWindow : Window
     private readonly ConfigManager _configManager;
     private List<SearchResult> _currentMatches = new();
     private bool _addMode;
-    private string _pendingKey = "";
+    private bool _isEditMode;
+    private string _editingKey = "";
+    private TermEntry? _editingEntry;
 
     public PopupWindow(TermRepository repository, ConfigManager configManager)
     {
@@ -47,7 +49,9 @@ public partial class PopupWindow : Window
     private void ResetState()
     {
         _addMode = false;
-        _pendingKey = "";
+        _isEditMode = false;
+        _editingKey = "";
+        _editingEntry = null;
         _currentMatches = new List<SearchResult>();
 
         SearchBox.Text = "";
@@ -115,6 +119,19 @@ public partial class PopupWindow : Window
             return;
         }
 
+        // 可配置的"编辑当前选中词条"快捷键（默认 Ctrl+Shift+Enter）：只有当前确实有
+        // 选中的匹配结果时才生效，没有匹配时按这个快捷键没有意义（应该走新增流程）。
+        if (IsEditEntryHotkey(e.Key, Keyboard.Modifiers))
+        {
+            if (_currentMatches.Count > 0)
+            {
+                int idx = ResultsList.SelectedIndex >= 0 ? ResultsList.SelectedIndex : 0;
+                EnterEditMode(_currentMatches[idx]);
+            }
+            e.Handled = true;
+            return;
+        }
+
         if (e.Key == Key.Down)
         {
             MoveSelection(1);
@@ -135,6 +152,16 @@ public partial class PopupWindow : Window
     private bool IsAddVariantHotkey(Key key, System.Windows.Input.ModifierKeys modifiers)
     {
         if (!KeyComboParser.TryParse(_configManager.Config.AddVariantHotkey, out var comboModifiers, out var comboKey))
+        {
+            return false;
+        }
+
+        return key == comboKey && modifiers == comboModifiers;
+    }
+
+    private bool IsEditEntryHotkey(Key key, System.Windows.Input.ModifierKeys modifiers)
+    {
+        if (!KeyComboParser.TryParse(_configManager.Config.EditEntryHotkey, out var comboModifiers, out var comboKey))
         {
             return false;
         }
@@ -184,17 +211,66 @@ public partial class PopupWindow : Window
     private void EnterAddMode(string key)
     {
         _addMode = true;
-        _pendingKey = key;
+        _isEditMode = false;
+        _editingKey = "";
+        _editingEntry = null;
 
-        AddKeyLabel.Text = key;
+        AddPanelTitle.Text = "补充术语";
+        AddPanelFooter.Text = "按 Enter 保存，Esc 取消并关闭";
+        AddPanelFooter.Foreground = System.Windows.Media.Brushes.Gray;
+
+        AddKeyBox.IsReadOnly = false;
+        AddKeyBox.Text = key;
         FullNameBox.Text = "";
         DescriptionBox.Text = "";
 
         ResultsPanel.Visibility = Visibility.Collapsed;
         AddPanel.Visibility = Visibility.Visible;
 
+        // 缩写默认填入查询词，但允许改（比如查询时输入的是小写 abc，想存成 ABC）。
+        // 全选一下，方便直接改大小写或整个重新输入。
+        AddKeyBox.Focus();
+        Keyboard.Focus(AddKeyBox);
+        AddKeyBox.SelectAll();
+    }
+
+    /// <summary>
+    /// 编辑当前选中词条的全称/解释（缩写本身不允许在这个流程里改，避免和"改缩写=换 key"
+    /// 混在一起变复杂——真要改缩写，还是走手动编辑 terms.json）。
+    /// </summary>
+    private void EnterEditMode(SearchResult result)
+    {
+        _addMode = true;
+        _isEditMode = true;
+        _editingKey = result.Key;
+        _editingEntry = result.Entry;
+
+        AddPanelTitle.Text = "编辑术语";
+        AddPanelFooter.Text = "按 Enter 保存修改，Esc 取消";
+        AddPanelFooter.Foreground = System.Windows.Media.Brushes.Gray;
+
+        AddKeyBox.Text = result.Key;
+        AddKeyBox.IsReadOnly = true;
+        FullNameBox.Text = result.Entry.FullName;
+        DescriptionBox.Text = result.Entry.Description;
+
+        ResultsPanel.Visibility = Visibility.Collapsed;
+        AddPanel.Visibility = Visibility.Visible;
+
+        // 缩写是只读的，直接把焦点给全称，全选方便整段改掉或者微调。
         FullNameBox.Focus();
         Keyboard.Focus(FullNameBox);
+        FullNameBox.SelectAll();
+    }
+
+    private void AddKeyBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            FullNameBox.Focus();
+            Keyboard.Focus(FullNameBox);
+            e.Handled = true;
+        }
     }
 
     private void FullNameBox_KeyDown(object sender, KeyEventArgs e)
@@ -227,7 +303,30 @@ public partial class PopupWindow : Window
             return;
         }
 
-        _repository.AddTerm(_pendingKey, fullName, description);
+        if (_isEditMode)
+        {
+            bool updated = _repository.UpdateTerm(_editingKey, _editingEntry!, fullName, description);
+            if (!updated)
+            {
+                // 罕见情况：编辑过程中术语表被外部改动，原条目已经找不到了。留在当前面板，
+                // 不假装保存成功，让用户看到提示后自己决定重新查询还是 Esc 放弃。
+                AddPanelFooter.Text = "保存失败：该词条可能已被外部修改，请按 Esc 后重新查询再试。";
+                AddPanelFooter.Foreground = System.Windows.Media.Brushes.Firebrick;
+                return;
+            }
+        }
+        else
+        {
+            var key = AddKeyBox.Text.Trim();
+            if (string.IsNullOrEmpty(key))
+            {
+                AddKeyBox.Focus();
+                return;
+            }
+
+            _repository.AddTerm(key, fullName, description);
+        }
+
         Hide();
     }
 
