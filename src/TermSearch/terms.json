@@ -10982,5 +10982,11 @@
                      "FullName":  "External Hygon Memory Interconnect",
                      "Description":  "外部海光内存互连，插槽间一致性互连"
                  }
+             ],
+    "HTIF":  [
+                 {
+                     "FullName":  "Host-Target Interface",
+                     "Description":  "RISC-V体系结构中用于宿主机(Host)与目标系统(Target, 如模拟器或FPGA硬件)之间进行通信的标准协议和机制"
+                 }
              ]
 }
