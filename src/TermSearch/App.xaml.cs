@@ -71,6 +71,8 @@ public partial class App : Application
         _trayIconManager.StartWithWindowsToggled += OnStartWithWindowsToggled;
         _trayIconManager.ExitRequested += () => Shutdown();
 
+        CheckPendingUpdateFailureMarker();
+
         // 启动时顺手异步查一下有没有新版本，不阻塞热键注册/弹窗响应速度；查不到/查失败都静默处理。
         _ = CheckForUpdateAsync(showUpToDateMessage: false);
     }
@@ -284,6 +286,32 @@ public partial class App : Application
             _updateWindow.Closed += (_, _) => _updateWindow = null;
             _updateWindow.Show();
         });
+    }
+
+    /// <summary>
+    /// 如果上次自动更新是在替换脚本里失败的（比如拷贝新 exe 时被占用/权限不足），脚本会保留
+    /// 下载的安装包并在程序目录下留一个标记文件，同时把旧版本重新拉起来——这里在启动时检测
+    /// 这个标记，提醒一次然后删掉，避免每次启动都重复提示。
+    /// </summary>
+    private void CheckPendingUpdateFailureMarker()
+    {
+        var markerPath = Path.Combine(AppDir, UpdateApplier.UpdateFailedMarkerFileName);
+        if (!File.Exists(markerPath)) return;
+
+        try
+        {
+            var tempDir = File.ReadAllText(markerPath).Trim();
+            Logger.Log($"上次自动更新失败，安装包保留在：{tempDir}");
+            _trayIconManager?.ShowBalloon("术语速查", $"上次自动更新失败，已恢复到当前版本。安装包保留在：{tempDir}", ToolTipIcon.Error);
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"读取更新失败标记文件出错：{ex.Message}");
+        }
+        finally
+        {
+            try { File.Delete(markerPath); } catch (Exception ex) { Logger.Log($"删除更新失败标记文件失败：{ex.Message}"); }
+        }
     }
 
     private void OnStartWithWindowsToggled(bool enabled)

@@ -14,12 +14,18 @@ namespace TermSearch.Services;
 /// </summary>
 public static class UpdateApplier
 {
-    /// <summary>下载 Release 里的 zip 附件并解压出其中的 TermSearch.exe，返回解压出的路径；失败返回 null。</summary>
-    public static async Task<string?> DownloadAndExtractAsync(UpdateInfo info, IProgress<double>? progress = null)
+    /// <summary>
+    /// 更新在替换脚本里失败（比如拷贝新 exe 时被占用/权限不足）时，脚本会在程序目录下留一个
+    /// 这个文件名的标记，内容是保留下来的安装包所在目录；App.xaml.cs 启动时检测它、提醒一次后删除。
+    /// </summary>
+    public const string UpdateFailedMarkerFileName = "update_failed.marker";
+
+    /// <summary>下载 Release 里的 zip 附件并解压出其中的 TermSearch.exe，返回解压出的路径和所在的临时目录；失败返回 (null, null)。</summary>
+    public static async Task<(string? ExePath, string? TempDir)> DownloadAndExtractAsync(UpdateInfo info, IProgress<double>? progress = null)
     {
+        var tempDir = Path.Combine(Path.GetTempPath(), "TermSearchUpdate_" + Guid.NewGuid().ToString("N"));
         try
         {
-            var tempDir = Path.Combine(Path.GetTempPath(), "TermSearchUpdate_" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(tempDir);
             var zipPath = Path.Combine(tempDir, info.AssetName);
 
@@ -55,24 +61,43 @@ public static class UpdateApplier
             if (exePath == null)
             {
                 Logger.Log($"下载的更新包 {info.AssetName} 里没有找到 TermSearch.exe。");
+                TryDeleteDirectory(tempDir);
+                return (null, null);
             }
-            return exePath;
+            return (exePath, tempDir);
         }
         catch (Exception ex)
         {
             Logger.Log($"下载/解压新版本失败：{ex.Message}");
-            return null;
+            TryDeleteDirectory(tempDir);
+            return (null, null);
+        }
+    }
+
+    private static void TryDeleteDirectory(string path)
+    {
+        try
+        {
+            if (Directory.Exists(path)) Directory.Delete(path, recursive: true);
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"清理更新临时目录失败：{ex.Message}");
         }
     }
 
     /// <summary>
     /// 启动一个独立的替换脚本并让它在后台等待，调用方随后应自行退出程序（比如
-    /// Application.Current.Shutdown()），退出后脚本会接手完成覆盖、重启。
+    /// Application.Current.Shutdown()），退出后脚本会接手完成覆盖、重启：
+    /// 覆盖成功就顺手删掉 <paramref name="tempDir"/>（下载的 zip + 解压产物，不用再留着）；
+    /// 覆盖失败（比如文件被占用/权限不足）则保留 <paramref name="tempDir"/> 以便排查，
+    /// 并留一个标记文件，让重新拉起来的旧版本在下次启动时提醒用户这次更新失败了。
     /// </summary>
-    public static void LaunchReplaceAndRestart(string newExePath, string currentExePath)
+    public static void LaunchReplaceAndRestart(string newExePath, string currentExePath, string tempDir)
     {
         var scriptPath = Path.Combine(Path.GetTempPath(), "TermSearchUpdate_" + Guid.NewGuid().ToString("N") + ".bat");
         int pid = Environment.ProcessId;
+        var failMarkerPath = Path.Combine(Path.GetDirectoryName(currentExePath)!, UpdateFailedMarkerFileName);
 
         // chcp 65001 切到 UTF-8 代码页，保证路径里如果有中文（比如装在带中文的文件夹下）不会乱码。
         var script =
@@ -86,6 +111,15 @@ if not errorlevel 1 (
   goto wait
 )
 copy /y "{newExePath}" "{currentExePath}" >nul
+if errorlevel 1 goto fail
+
+rmdir /s /q "{tempDir}" >nul 2>nul
+start "" "{currentExePath}"
+del "%~f0"
+exit /b
+
+:fail
+echo {tempDir}>"{failMarkerPath}"
 start "" "{currentExePath}"
 del "%~f0"
 """;

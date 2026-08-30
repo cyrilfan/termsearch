@@ -41,8 +41,8 @@ public partial class UpdateAvailableWindow : Window
 
         var progress = new Progress<double>(p => StatusText.Text = $"正在下载... {p:P0}");
 
-        var newExePath = await UpdateApplier.DownloadAndExtractAsync(_info, progress);
-        if (newExePath == null)
+        var (newExePath, tempDir) = await UpdateApplier.DownloadAndExtractAsync(_info, progress);
+        if (newExePath == null || tempDir == null)
         {
             ShowFailureAndReEnable("下载失败，请稍后再试，或者去 GitHub Release 页面手动下载。");
             return;
@@ -57,7 +57,7 @@ public partial class UpdateAvailableWindow : Window
 
         StatusText.Text = "下载完成，即将重启更新...";
 
-        UpdateApplier.LaunchReplaceAndRestart(newExePath, currentExePath);
+        UpdateApplier.LaunchReplaceAndRestart(newExePath, currentExePath, tempDir);
 
         // 替换脚本要等这个进程完全退出才会覆盖 exe，所以这里直接让整个程序退出；
         // 释放热键、互斥体等收尾工作交给 App.OnExit 统一处理。
