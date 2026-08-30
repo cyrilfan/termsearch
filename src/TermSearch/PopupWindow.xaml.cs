@@ -4,6 +4,7 @@ using TermSearch.Services;
 using Keyboard = System.Windows.Input.Keyboard;
 using Key = System.Windows.Input.Key;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using MouseButtonEventArgs = System.Windows.Input.MouseButtonEventArgs;
 using Clipboard = System.Windows.Clipboard;
 
 namespace TermSearch;
@@ -21,6 +22,12 @@ public partial class PopupWindow : Window
     private bool _isEditMode;
     private string _editingKey = "";
     private TermEntry? _editingEntry;
+
+    // 拖拽记住的位置只存在内存里，进程重启后（新的 PopupWindow 实例）自动恢复默认居中位置，
+    // 不写 config.json（需求确认：不需要跨重启持久化）。
+    private bool _hasDraggedPosition;
+    private double _draggedLeft;
+    private double _draggedTop;
 
     public PopupWindow(TermRepository repository, ConfigManager configManager)
     {
@@ -41,9 +48,55 @@ public partial class PopupWindow : Window
 
     private void PositionWindow()
     {
+        if (_hasDraggedPosition)
+        {
+            Left = _draggedLeft;
+            Top = _draggedTop;
+            ClampToVirtualScreen();
+            return;
+        }
+
         var workArea = SystemParameters.WorkArea;
         Left = workArea.Left + (workArea.Width - Width) / 2;
         Top = workArea.Top + workArea.Height * 0.18;
+    }
+
+    private void DragHandle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        try
+        {
+            DragMove();
+        }
+        catch (InvalidOperationException)
+        {
+            // DragMove 只能在鼠标左键按下期间调用，理论上这里的调用时机必然满足；防御性忽略。
+        }
+
+        ClampToVirtualScreen();
+        _hasDraggedPosition = true;
+        _draggedLeft = Left;
+        _draggedTop = Top;
+    }
+
+    /// <summary>
+    /// 把窗口夹紧到当前所有显示器组成的虚拟桌面范围内，避免拖到不存在的屏幕区域后（比如后续
+    /// 拔掉了外接显示器）再也找不到/弹不出窗口。
+    /// </summary>
+    private void ClampToVirtualScreen()
+    {
+        double virtualLeft = SystemParameters.VirtualScreenLeft;
+        double virtualTop = SystemParameters.VirtualScreenTop;
+        double virtualRight = virtualLeft + SystemParameters.VirtualScreenWidth;
+        double virtualBottom = virtualTop + SystemParameters.VirtualScreenHeight;
+
+        double w = ActualWidth > 0 ? ActualWidth : Width;
+        double h = ActualHeight > 0 ? ActualHeight : w;
+
+        double maxLeft = Math.Max(virtualLeft, virtualRight - w);
+        double maxTop = Math.Max(virtualTop, virtualBottom - h);
+
+        Left = Math.Clamp(Left, virtualLeft, maxLeft);
+        Top = Math.Clamp(Top, virtualTop, maxTop);
     }
 
     private void ResetState()

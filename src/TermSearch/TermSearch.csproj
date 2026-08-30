@@ -12,7 +12,7 @@
     <!-- 跟 GitHub Release 的 tag（v0.1、v0.2、...）保持一致，Services/UpdateChecker.cs 用它
          和 GitHub 上最新 Release 的 tag 比较，判断要不要提示更新。每次发新 Release 前，记得
          把这里改成即将打的那个 tag 对应的号（比如要发 v0.3，这里就先改成 0.3）。 -->
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <!-- 我们通过 app.manifest 声明 PerMonitorV2 DPI 感知（WPF 窗口定位依赖它），
          WinForms 分析器会建议改用 SetHighDpiMode API，但那只影响 WinForms 控件，这里用不到，忽略即可。 -->
