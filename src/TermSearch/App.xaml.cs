@@ -19,6 +19,7 @@ public partial class App : Application
     private static string ConfigPath => Path.Combine(AppDir, "config.json");
 
     private Mutex? _singleInstanceMutex;
+    private bool _ownsSingleInstanceMutex;
     private EventWaitHandle? _showPopupEvent;
 
     private TermRepository? _termRepository;
@@ -41,6 +42,7 @@ public partial class App : Application
         };
 
         _singleInstanceMutex = new Mutex(true, MutexName, out bool createdNew);
+        _ownsSingleInstanceMutex = createdNew;
         if (!createdNew)
         {
             NotifyExistingInstance();
@@ -305,7 +307,7 @@ public partial class App : Application
         _termRepository?.Dispose();
         _trayIconManager?.Dispose();
 
-        if (_singleInstanceMutex != null)
+        if (_singleInstanceMutex != null && _ownsSingleInstanceMutex)
         {
             try { _singleInstanceMutex.ReleaseMutex(); } catch (Exception ex) { Logger.Log($"释放互斥体失败：{ex.Message}"); }
         }
