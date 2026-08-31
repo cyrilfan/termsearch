@@ -43,6 +43,10 @@ public class TermRepository : IDisposable
 
     public event Action? TermsReloaded;
 
+    /// <summary>加载失败时触发（文件损坏、解析出错等），不会在首次构造时触发（那时还没人订阅）。
+    /// 参数是损坏文件备份后的路径；备份也失败的话是 null。</summary>
+    public event Action<string?>? LoadFailed;
+
     public TermRepository(string filePath)
     {
         _filePath = filePath;
@@ -79,9 +83,30 @@ public class TermRepository : IDisposable
             }
             catch (Exception ex)
             {
-                Logger.Log($"加载 terms.json 失败，将使用空术语表：{ex.Message}");
-                _terms = new Dictionary<string, List<TermEntry>>();
+                // 不重置 _terms：保留调用前那份还能用的旧数据，比直接清空成空术语表更安全——
+                // 首次启动时文件本来就是空的，这里"保留旧数据"自然退化成空表，不用特殊处理。
+                Logger.Log($"加载 terms.json 失败，继续使用上一次的数据：{ex.Message}");
+                var backupPath = TryBackupCorruptedFile();
+                LoadFailed?.Invoke(backupPath);
             }
+        }
+    }
+
+    /// <summary>把解析失败的 terms.json 原样复制一份留档（比如 terms.json.corrupted-20260831-153000），
+    /// 方便事后手动抢救内容；不删除/移动原文件，下一次正常保存会自然把它覆盖掉。</summary>
+    private string? TryBackupCorruptedFile()
+    {
+        try
+        {
+            if (!File.Exists(_filePath)) return null;
+            var backupPath = $"{_filePath}.corrupted-{DateTime.Now:yyyyMMdd-HHmmss}";
+            File.Copy(_filePath, backupPath, overwrite: true);
+            return backupPath;
+        }
+        catch (Exception ex)
+        {
+            Logger.Log($"备份损坏的 terms.json 失败：{ex.Message}");
+            return null;
         }
     }
 
@@ -261,7 +286,7 @@ public class TermRepository : IDisposable
         {
             _lastSelfWriteUtc = DateTime.UtcNow;
             var json = JsonSerializer.Serialize(_terms, JsonOptions);
-            File.WriteAllText(_filePath, json);
+            SafeFile.WriteAllTextAtomic(_filePath, json);
         }
         catch (Exception ex)
         {

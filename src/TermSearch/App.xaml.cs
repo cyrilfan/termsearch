@@ -71,6 +71,9 @@ public partial class App : Application
         _trayIconManager.StartWithWindowsToggled += OnStartWithWindowsToggled;
         _trayIconManager.ExitRequested += () => Shutdown();
 
+        _termRepository.LoadFailed += backupPath => OnDataLoadFailed("术语表", backupPath);
+        _configManager.LoadFailed += backupPath => OnDataLoadFailed("配置", backupPath);
+
         CheckPendingUpdateFailureMarker();
 
         // 启动时顺手异步查一下有没有新版本，不阻塞热键注册/弹窗响应速度；查不到/查失败都静默处理。
@@ -286,6 +289,19 @@ public partial class App : Application
             _updateWindow.Closed += (_, _) => _updateWindow = null;
             _updateWindow.Show();
         });
+    }
+
+    /// <summary>
+    /// terms.json / config.json 加载失败时的提醒（文件损坏、解析出错等）：数据本身已经在
+    /// TermRepository/ConfigManager 里保留了上一次的旧数据继续用，这里只是让用户知道
+    /// "现在用的是旧数据，文件已经坏了，需要去看一眼"，避免这种沉默失败被长期忽略。
+    /// </summary>
+    private void OnDataLoadFailed(string dataName, string? backupPath)
+    {
+        var message = backupPath != null
+            ? $"{dataName}加载失败，正在使用上一次的数据。已将损坏文件备份为：{Path.GetFileName(backupPath)}"
+            : $"{dataName}加载失败，正在使用上一次的数据，请检查文件是否损坏。";
+        _trayIconManager?.ShowBalloon("术语速查", message, ToolTipIcon.Error);
     }
 
     /// <summary>
