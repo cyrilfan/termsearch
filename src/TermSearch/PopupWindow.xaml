@@ -16,10 +16,6 @@
         PreviewKeyDown="Window_PreviewKeyDown">
 
     <Border Background="#FFFFFFFF" CornerRadius="10" BorderBrush="#FFD8DBE0" BorderThickness="1">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="28" ShadowDepth="6" Direction="270" Opacity="0.22" Color="#000000"/>
-        </Border.Effect>
-
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="10"/>

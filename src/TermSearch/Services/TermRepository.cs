@@ -176,6 +176,13 @@ public class TermRepository : IDisposable
                 ? b.Score - a.Score
                 : string.Compare(a.Key, b.Key, StringComparison.OrdinalIgnoreCase));
 
+            // 短查询（比如单个字母）可能命中成百上千个模糊匹配，但结果区域最多也就显示几条——
+            // 多出来的既看不到也用不上，只会白白拖慢每次按键的构建/渲染。列表已按质量排好序，
+            // 直接砍掉排名靠后的部分不影响体验。
+            const int MaxDisplayResults = 30;
+            if (prefix.Count > MaxDisplayResults) prefix.RemoveRange(MaxDisplayResults, prefix.Count - MaxDisplayResults);
+            if (fuzzy.Count > MaxDisplayResults) fuzzy.RemoveRange(MaxDisplayResults, fuzzy.Count - MaxDisplayResults);
+
             var results = new List<SearchResult>(exact.Count + prefix.Count + fuzzy.Count);
             results.AddRange(exact);
             results.AddRange(prefix);
