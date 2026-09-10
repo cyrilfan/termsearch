@@ -7021,6 +7021,10 @@
                 {
                     "FullName":  "Rquirement Analysis Team",
                     "Description":  "需求分析团队"
+                },
+                {
+                    "FullName":  "Register Alias Table",
+                    "Description":  "寄存器别名表, 也叫重命名映射表.  写目标寄存器时, 从空闲池这一个全新的物理寄存器, 更新RAT映射; 读源寄存器时, 查RAT, 看当前指向哪个物理寄存器"
                 }
             ],
     "RAT leader":  [
@@ -10988,5 +10992,59 @@
                      "FullName":  "Host-Target Interface",
                      "Description":  "RISC-V体系结构中用于宿主机(Host)与目标系统(Target, 如模拟器或FPGA硬件)之间进行通信的标准协议和机制"
                  }
-             ]
+             ],
+    "EBM":  [
+                {
+                    "FullName":  "Execution Based Model",
+                    "Description":  ""
+                }
+            ],
+    "VLIW":  [
+                 {
+                     "FullName":  "Very Long Instruction Word",
+                     "Description":  "超长指令字"
+                 }
+             ],
+    "WAW":  [
+                {
+                    "FullName":  "Write After Write",
+                    "Description":  "写后写, False dependence一种"
+                }
+            ],
+    "RAW":  [
+                {
+                    "FullName":  "Read After Write",
+                    "Description":  "写后读, True dependence"
+                }
+            ],
+    "WAR":  [
+                {
+                    "FullName":  "Write After Read",
+                    "Description":  "读后写, False dependence一种"
+                }
+            ],
+    "AAR":  [
+                {
+                    "FullName":  "After Action Review",
+                    "Description":  ""
+                }
+            ],
+    "IPC":  [
+                {
+                    "FullName":  "Instructions Per Cycle",
+                    "Description":  ""
+                }
+            ],
+    "TMAM":  [
+                 {
+                     "FullName":  "Topdown Microarchitecture Analysis Method",
+                     "Description":  ""
+                 }
+             ],
+    "DSB":  [
+                {
+                    "FullName":  "Decoded-uop Stream Buffer",
+                    "Description":  ""
+                }
+            ]
 }
