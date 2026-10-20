@@ -38,12 +38,20 @@ public partial class PopupWindow : Window
 
     public void ShowAtFixedPosition()
     {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
         ResetState();
         PositionWindow();
         Show();
         Activate();
         SearchBox.Focus();
         Keyboard.Focus(SearchBox);
+
+        // 隐藏的透明窗口重新显示时，首帧渲染完成前会先露出上一次的旧画面；这里只记录这段耗时，
+        // 超过阈值才写日志，用来区分"渲染慢"和 HotkeyManager 里记录的"消息排队慢"。
+        Dispatcher.InvokeAsync(() =>
+        {
+            if (sw.ElapsedMilliseconds > 150) Logger.Log($"弹窗从 Show 到首帧渲染完成耗时 {sw.ElapsedMilliseconds}ms");
+        }, System.Windows.Threading.DispatcherPriority.Loaded);
     }
 
     private void PositionWindow()

@@ -50,6 +50,8 @@ public partial class App : Application
             return;
         }
 
+        PowerThrottling.OptOut();
+
         _showPopupEvent = new EventWaitHandle(false, EventResetMode.AutoReset, ShowPopupEventName);
         StartSecondInstanceListener();
 

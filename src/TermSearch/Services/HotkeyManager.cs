@@ -26,6 +26,9 @@ public class HotkeyManager : IDisposable
     [DllImport("user32.dll")]
     private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
+    [DllImport("user32.dll")]
+    private static extern int GetMessageTime();
+
     private Window? _messageWindow;
     private HwndSource? _source;
     private bool _registered;
@@ -71,6 +74,14 @@ public class HotkeyManager : IDisposable
     {
         if (msg == WM_HOTKEY && wParam.ToInt32() == HOTKEY_ID)
         {
+            // 热键消息入队到被处理之间的间隔：大说明进程/UI 线程被系统挂起或降速了，不是弹窗本身慢。
+            var queueDelay = unchecked(Environment.TickCount - GetMessageTime());
+            if (queueDelay > 150)
+            {
+                var power = System.Windows.Forms.SystemInformation.PowerStatus.PowerLineStatus;
+                Logger.Log($"热键消息排队 {queueDelay}ms 才被处理（工作集 {Environment.WorkingSet / 1048576}MB，供电：{power}）");
+            }
+
             HotkeyPressed?.Invoke();
             handled = true;
         }
