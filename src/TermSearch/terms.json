@@ -1207,6 +1207,10 @@
                {
                    "FullName":  "Critical Error Interrupts",
                    "Description":  "由严重错误触发的中断信号"
+               },
+               {
+                   "FullName":  "Coherence Interface",
+                   "Description":  ""
                }
            ],
     "CID":  [
@@ -8028,11 +8032,7 @@
     "SLT":  [
                 {
                     "FullName":  "System Level Test",
-                    "Description":  "在整机系统层面对芯片进行的测试，更贴近真实使用场景"
-                },
-                {
-                    "FullName":  "System Level Test",
-                    "Description":  "系统级量产测试"
+                    "Description":  "系统级量产测试. 在整机系统层面对芯片进行的测试，更贴近真实使用场景"
                 },
                 {
                     "FullName":  "System Level (Automation) Test",
@@ -10703,6 +10703,10 @@
                 {
                     "FullName":  "Load Repick/Replay Queue",
                     "Description":  "加载重选/重放队列,管理因冲突或缺失而需要重新调度或重放的加载指令的队列。"
+                },
+                {
+                    "FullName":  "Load Reissue Queue",
+                    "Description":  ""
                 }
             ],
     "FAB":  [
@@ -10733,12 +10737,20 @@
                 {
                     "FullName":  "Recently Store Tag",
                     "Description":  "最近存储标签,跟踪最近写入的缓存行标签的结构,用于存储到加载转发或一致性跟踪。"
+                },
+                {
+                    "FullName":  "Retired Store Table",
+                    "Description":  ""
                 }
             ],
     "MB":  [
                {
                    "FullName":  "Merge Buffer",
                    "Description":  "合并缓冲区,将多个较小的存储操作合并为单次更大的写入,以提高内存访问效率。"
+               },
+               {
+                   "FullName":  "Memory Buffer",
+                   "Description":  ""
                }
            ],
     "WPT":  [
@@ -11045,6 +11057,76 @@
                 {
                     "FullName":  "Decoded-uop Stream Buffer",
                     "Description":  ""
+                },
+                {
+                    "FullName":  "Data Synchronization Barrier",
+                    "Description":  "Arm架构中的一种内存屏障指令"
+                }
+            ],
+    "CIN":  [
+                {
+                    "FullName":  "Corporate Infrastructure Network",
+                    "Description":  "海光办公网"
+                }
+            ],
+    "RDN":  [
+                {
+                    "FullName":  "Research and Development Network",
+                    "Description":  "海光第一研发网"
+                }
+            ],
+    "EDN":  [
+                {
+                    "FullName":  "Engineering Development Network",
+                    "Description":  "海光第二研发网"
+                }
+            ],
+    "STN":  [
+                {
+                    "FullName":  "Self-developed Technology Network",
+                    "Description":  "海光第三研发网"
+                }
+            ],
+    "PDN":  [
+                {
+                    "FullName":  "Product Development Network",
+                    "Description":  "海光生产网"
+                }
+            ],
+    "CCP":  [
+                {
+                    "FullName":  "Crypto Co-Processor",
+                    "Description":  "密码协处理器"
+                }
+            ],
+    "GRF":  [
+                {
+                    "FullName":  "General Register File",
+                    "Description":  "通用寄存器堆"
+                }
+            ],
+    "MPKI":  [
+                 {
+                     "FullName":  "Misses Per Kilo-Instructions",
+                     "Description":  "每千条指令的cache miss数/分支预测错误数"
+                 }
+             ],
+    "IQ":  [
+               {
+                   "FullName":  "Issue Queue",
+                   "Description":  ""
+               }
+           ],
+    "TMO":  [
+                {
+                    "FullName":  "TLB Maintenance Operation",
+                    "Description":  "TLB维护操作. 指对TLB进行清除, 刷新或使无效"
+                }
+            ],
+    "CDB":  [
+                {
+                    "FullName":  "Common Data Bus",
+                    "Description":  "公共数据总线"
                 }
             ]
 }
